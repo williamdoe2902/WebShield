@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebShield report | {{ scan.target }}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="report-page">
+  <header class="topbar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">W</span><span>webshield<span class="brand-dot">.</span></span></a><button class="print-button" onclick="window.print()"><span aria-hidden="true">↓</span> Save / print</button></header>
+  <main class="shell report-shell">
+    <p class="eyebrow">AUDIT REPORT / {{ scan.id }}</p>
+    <h1>Findings</h1>
+    <p class="lede report-target">{{ scan.target }}</p>
+    <div class="report-summary"><div><strong>{{ scan.pages_scanned }}</strong><span>Pages checked</span></div><div><strong>{{ scan.findings|length }}</strong><span>Findings</span></div><div><strong>{{ scan.status|upper }}</strong><span>Scan status</span></div></div>
+    {% if scan.error %}<p class="error-banner">Scan stopped: {{ scan.error }}</p>{% endif %}
+    <section class="report-section"><h2>Findings</h2>
+      {% for finding in scan.findings %}
+      <article class="finding">
+        <div class="finding-top"><h3>{{ finding.title }}</h3><span class="severity severity-{{ finding.severity|lower }}">{{ finding.severity }}</span></div>
+        <p class="finding-url">{{ finding.url }}</p>
+        <p>{{ finding.evidence }}</p>
+        <div class="remediation"><span>RECOMMENDATION</span><p>{{ finding.remediation }}</p></div>
+      </article>
+      {% else %}<p class="no-findings">No findings recorded for this scan. This is not a guarantee that the application is secure.</p>{% endfor %}
+    </section>
+    <section class="report-section"><h2>Pages and inputs</h2>
+      {% for page in scan.pages %}
+      <article class="page-entry"><h3>{{ page.url }}</h3>
+        {% for form in page.forms %}<div class="form-entry"><strong>{{ form.method }} form</strong><span>Action: {{ form.action or page.url }}</span><span>Inputs: {% for item in form.inputs %}{{ item.name or '(unnamed)' }} ({{ item.type }}){% if not loop.last %}, {% endif %}{% else %}none{% endfor %}</span></div>
+        {% else %}<p>No forms found.</p>{% endfor %}
+      </article>
+      {% else %}<p class="no-findings">No pages were successfully checked.</p>{% endfor %}
+    </section>
+    <p class="disclaimer">WebShield performs limited, non-destructive checks on local lab targets. Results are indicators for manual review, not a penetration test or certification.</p>
+  </main>
+</body>
+</html>

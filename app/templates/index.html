@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f4ef">
+  <title>WebShield | Local security audit</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="WebShield dashboard">
+      <span class="brand-mark" aria-hidden="true">W</span>
+      <span>webshield<span class="brand-dot">.</span></span>
+    </a>
+    <div class="environment"><span class="status-dot"></span> LOCAL LAB MODE</div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">APPLICATION SECURITY / SCANNER</p>
+        <h1 id="page-title">Security audit</h1>
+        <p class="lede">Map a local test application, review its security headers, and get practical findings in one place.</p>
+      </div>
+      <div class="scope-note"><span class="scope-icon" aria-hidden="true">◎</span><span>Loopback targets only<br><strong>Authorized lab systems</strong></span></div>
+    </section>
+
+    <section class="launch" aria-labelledby="launch-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">NEW AUDIT</p><h2 id="launch-title">Choose a target</h2></div>
+        <span class="step-label">01 <span>/</span> 01</span>
+      </div>
+      <form id="scan-form" class="scan-form">
+        <label for="target">Application URL</label>
+        <div class="form-row">
+          <div class="url-field"><span aria-hidden="true">↗</span><input id="target" name="target" type="url" placeholder="http://127.0.0.1:3000" required autocomplete="url"></div>
+          <button id="scan-button" type="submit"><span aria-hidden="true">▶</span> Start scan</button>
+        </div>
+        <label class="consent"><input id="authorized" type="checkbox" required><span>I own this application or have explicit permission to test it.</span></label>
+        <p class="form-hint">Only localhost and literal loopback IPs are accepted. Redirects are not followed.</p>
+        <p id="form-message" class="message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="launch" aria-labelledby="monitor-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">LOCAL MONITOR</p><h2 id="monitor-title">Watch an authorized app</h2></div>
+        <span class="step-label">CHECKS EVERY 5 MIN</span>
+      </div>
+      <form id="monitor-form" class="scan-form">
+        <label for="monitor-target">Application URL</label>
+        <div class="form-row">
+          <div class="url-field"><span aria-hidden="true">↻</span><input id="monitor-target" name="target" type="url" value="http://localhost/Midsem/Hospital.php" required autocomplete="url"></div>
+          <button id="monitor-button" type="submit">Add monitor</button>
+        </div>
+        <label class="consent"><input id="monitor-authorized" type="checkbox" required><span>I own this application or have explicit permission to monitor it.</span></label>
+        <p class="form-hint">Runs an initial scan when added, then every five minutes while WebShield is running. Local targets only.</p>
+        <p id="monitor-message" class="message" role="status" aria-live="polite"></p>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Target</th><th>Last check</th><th>Findings</th><th>Status</th><th>Alert</th><th></th></tr></thead>
+          <tbody id="monitor-list">
+            <tr class="empty-row"><td colspan="6"><span>No monitors configured</span><small>Add an authorized local app above.</small></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="results" aria-labelledby="results-title">
+      <div class="section-heading results-heading">
+        <div><p class="eyebrow">ACTIVITY</p><h2 id="results-title">Recent scans</h2></div>
+        <span id="scan-count" class="count">{{ scans|length }} RECORDS</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Target</th><th>Started</th><th>Pages</th><th>Findings</th><th>Status</th><th></th></tr></thead>
+          <tbody id="scan-list">
+            {% for scan in scans %}
+            <tr data-id="{{ scan.id }}">
+              <td class="target-cell">{{ scan.target }}</td>
+              <td>{{ scan.created_at[:16].replace('T', ' ') }}</td>
+              <td>{{ scan.pages_scanned }}</td>
+              <td>{{ scan.findings|length }}</td>
+              <td><span class="state state-{{ scan.status }}">{{ scan.status }}</span></td>
+              <td>{% if scan.status == 'complete' %}<a class="report-link" href="/reports/{{ scan.id }}" target="_blank" rel="noopener">Report ↗</a>{% endif %}</td>
+            </tr>
+            {% else %}
+            <tr class="empty-row"><td colspan="6"><span class="empty-icon" aria-hidden="true">⌁</span><span>No scans yet</span><small>Authorized local scans will appear here.</small></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <footer><span>WEBSHIELD / EDUCATIONAL LAB TOOL</span><span>MAX 30 PAGES · READ-ONLY FORM INVENTORY</span></footer>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
